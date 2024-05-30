@@ -1,25 +1,44 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useContext } from 'react';
+import { BrowserRouter as Router, Route, Redirect, Switch } from 'react-router-dom';
+import { AuthContext, AuthProvider } from './context/AuthContext';
+import { ThemeContext, ThemeProvider } from './context/ThemeContext';
+import Login from './components/Auth/Login';
+import Navbar from './components/Navbar';
+import ActiveOrders from './components/Orders/ActiveOrders';
+import CompletedOrders from './components/Orders/CompletedOrders';
+import './styles.css';
 
-function App() {
+const App = () => {
+  const { isAuthenticated } = useContext(AuthContext);
+  const { darkTheme } = useContext(ThemeContext);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className={darkTheme ? 'dark' : 'light'}>
+      <Router>
+        {!isAuthenticated ? (
+          <Redirect to="/login" />
+        ) : (
+          <>
+            <Navbar />
+            <Switch>
+              <Route path="/login" component={Login} />
+              <Route path="/active-orders" component={ActiveOrders} />
+              <Route path="/completed-orders" component={CompletedOrders} />
+              <Redirect from="/" to="/active-orders" />
+            </Switch>
+          </>
+        )}
+      </Router>
     </div>
   );
-}
+};
 
-export default App;
+const WrappedApp = () => (
+  <AuthProvider>
+    <ThemeProvider>
+      <App />
+    </ThemeProvider>
+  </AuthProvider>
+);
+
+export default WrappedApp;
